@@ -87,6 +87,9 @@ HeatMap.prototype = {
         for (var i = 3; i < len; i += 4) {
             // [0] -> r, [1] -> g, [2] -> b, [3] -> alpha
             var alpha = imgData[i],
+			// 这里为什么乘以4，弄了好长时间才搞明白
+			// 是因为要取调色板中的颜色，而调色板数的颜色数据对应的步长是4
+			// 如果这里的4换成其它值，更有意思
                 offset = alpha * 4;
 
             if (!offset){
