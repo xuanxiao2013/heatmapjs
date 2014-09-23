@@ -11,7 +11,7 @@ HeatMap.prototype = {
 			width: w,
 			height: h,
 			// 热图画布透明度，取值范围 0-255
-			opacity: 100,
+			opacity: 180,
 			// 点半径
 			radius: 30,
 			// 边界模糊半径
@@ -131,6 +131,6 @@ var heatmap = new HeatMap({
     id: 'heatmapContainer'
 });
 
-heatmap.renderPoint(100, 100, 100);
-heatmap.renderPoint(75, 75, 100);
+heatmap.renderPoint(100, 300, 100);
+//heatmap.renderPoint(75, 75, 100);
 heatmap.colorize();
