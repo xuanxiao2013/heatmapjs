@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="HandheldFriendly" content="true">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>heatmap test</title>
+</head>
+<body>
+	<div id="heatmapContainer" style="width:800px;height:600px;border:1px solid green;"></div>
+	<script src="../src/heatmap.js"></script>
+	<script>
+		var heatmap = new HeatMap({
+			width: 800,
+			height: 600,
+			id: 'heatmapContainer'
+		});
+		window.onload = function(){
+			var data = [], container = document.getElementById('heatmapContainer');
+			var active = false, timer;
+
+
+			container.onmouseover = function(e){
+				startTimer();
+			};
+			container.onmousemove = function(e){
+				var x = parseInt(e.layerX, 10), y = parseInt(e.layerY, 10);
+				if(active){
+					active = false;
+
+					if(!data[x]){
+						data[x] = [];
+					}
+					if(data[x][y]){
+						data[x][y] = data[x][y] + 5;
+					}else{
+						data[x][y] = 50;
+					}
+					heatmap.addPoint(x, y, data[x][y]);
+				}
+			}
+			container.onmouseout = function(e){
+				stopTimer();
+			}
+
+			
+			function startTimer(){
+				timer = setInterval(function(){
+					active = true;			
+				}, 50);
+			}
+
+			function stopTimer(){
+				clearInterval(timer);	
+			}
+
+		}
+	</script>
+</body>
+</html>

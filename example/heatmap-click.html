@@ -8,16 +8,18 @@
   <title>heatmap test</title>
 </head>
 <body>
-	<div id="heatmapContainer" style="background:url('1.png');width:720px;height:540px;border:1px solid green;"></div>
+	<div id="heatmapContainer" style="width:800px;height:600px;border:1px solid green;"></div>
 	<script src="../src/heatmap.js"></script>
 	<script>
 		var heatmap = new HeatMap({
-			width: 720,
-			height: 540,
+			width: 800,
+			height: 600,
 			id: 'heatmapContainer'
 		});
 		window.onload = function(){
-			heatmap.randomPoints(100);
+			document.getElementById('heatmapContainer').onclick = function(e){
+				heatmap.addPoint(e.layerX, e.layerY, 50);
+			};
 		}
 	</script>
 </body>

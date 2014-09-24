@@ -4,6 +4,7 @@ function HeatMap(opts) {
 
 HeatMap.prototype = {
 
+	// 初始化参数配置
 	config: function(opts){
 		var me = this;
 		var w = opts.width, h = opts.height, id = opts.id;
@@ -11,7 +12,7 @@ HeatMap.prototype = {
 			width: w,
 			height: h,
 			// 热图画布透明度，取值范围 0-255
-			opacity: 180,
+			opacity: 100,
 			// 点半径
 			radius: 30,
 			// 边界模糊半径
@@ -44,15 +45,8 @@ HeatMap.prototype = {
 		me.options.pctx = pctx;
 	},
 
-    renderPoint: function(x, y, val) {
-        var me = this;
-        me.renderShadow(x, y, val);
-		//var br = me.options.radius * me.options.bshadow;
-		//me.colorize(x - br, y - br);
-    },
-
     // 绘制圆阴影：可视区域只绘制了一个圆阴影效果，而圆本身的位置在可视区域之外
-    renderShadow: function(x, y, val) {
+    renderShadow: function(x, y, val, cache) {
         var me = this,
             ctx = me.options.ctx,
             radius = me.options.radius,
@@ -67,20 +61,15 @@ HeatMap.prototype = {
         ctx.arc(x - bval, y - bval, me.options.radius, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.fill();
+		if(!cache){
+			me.cachePoint(x, y, val);
+		}
     },
 
 	// 绘制彩色热图根据调色板
-    colorize: function(x, y) {
-        var me = this, w, h, ctx = me.options.ctx, r3 = me.options.radius * 2 * me.options.bshadow;
-		if(!x || !y){
-			x = 0;
-			y = 0;
-			w = me.options.width;
-			h = me.options.height;
-		}else{
-			w = h = r3;
-		}
-        var img = ctx.getImageData(x, y, w, h);
+    colorize: function() {
+        var me = this, w = me.options.width, h = me.options.height, ctx = me.options.ctx;
+        var img = ctx.getImageData(0, 0, w, h);
         var imgData = img.data, len = imgData.length, palette = me.getPalette();
         var opacity = me.options.opacity;
 		
@@ -103,7 +92,7 @@ HeatMap.prototype = {
             imgData[i] = finalAlpha;
         }
         img.data = imgData;
-        ctx.putImageData(img, x, y);
+        ctx.putImageData(img, 0, 0);
     },
 	
     // 通过调色板来获取平滑的颜色值
@@ -121,16 +110,40 @@ HeatMap.prototype = {
 		// 前三个值表示 红绿蓝，第四个值表示alpha 通道
 		// 也就是这个一位数组的长度是: 1 * 256 * 4;
         return pctx.getImageData(0, 0, 1, 256).data;
-    }
+    },
 
 }
 
-var heatmap = new HeatMap({
-    width: 600,
-    height: 400,
-    id: 'heatmapContainer'
-});
+// 缓存点数据
+HeatMap.prototype.cachePoint = function(x, y, val){
+	var me = this, points = me.options.points, data = points.data;
+	if(val > points.max){
+		points.max = val;
+	}
+	data.push([x, y, val]);
+}
 
-heatmap.renderPoint(100, 300, 100);
-//heatmap.renderPoint(75, 75, 100);
-heatmap.colorize();
+// 增加一个热点
+HeatMap.prototype.addPoint = function(x, y, val){
+	var me = this;
+	me.options.ctx.clearRect(0, 0, me.options.width, me.options.height);
+	me.options.pctx.clearRect(0, 0, 1, 256);
+
+	var data = me.options.points.data, len = data.length;
+	for(var i = 0; i < len; i ++){
+		me.renderShadow(data[i][0], data[i][1], data[i][2], true);
+	}
+	me.renderShadow(x, y, val);
+	me.colorize();
+}
+
+// 随机画热点
+HeatMap.prototype.randomPoints = function(points){
+	var me = this;
+	var w = me.options.width, h = me.options.height, max = 200;
+	for(var i = 0; i < points; i ++){
+		me.renderShadow(Math.floor(Math.random() * w + 1 ), Math.floor(Math.random() * h + 1 ), Math.floor(Math.random()* max + 1));
+	}
+	me.colorize();
+}
+
